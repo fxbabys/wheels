@@ -1,5 +1,8 @@
 /**
- *  call apply bind 都改变了 this 的指向, call 接收一个参数列表 apply 接收一个参数数组 bind 返回一个函数
+ *  call apply bind 都改变了 this 的指向
+ *  call 接收一个参数列表 
+ *  apply 接收一个参数数组 
+ *  bind 返回一个函数
  * 
  * 模拟思路:
  * 1. 默认为window
@@ -30,7 +33,7 @@ Function.prototype.myApply = function (context) {
   context.fn = this
 
   var args = [...arguments].slice(1)
-  if (args[0]) {
+  if (args[0]) { // 判断是否存在第二个参数
     result = context.fn(...args[0])
   } else {
     result = context.fn()
@@ -47,10 +50,11 @@ Function.prototype.myBind = function (context) {
   var _this = this
   var args = [...arguments].slice(1)
   return function F () {
-    if (this instanceof F) {
+    if (this instanceof F) {  // new 调用
       return new _this(...args, ...arguments)
     }
     return _this.call(context, ...arguments)
+    // or return _this.apply(context, args.concat(...arguments))
   }
 }
 
