@@ -12,7 +12,7 @@ function MyPromise (fn) {
 
   _this.resolve = function (value) {
     if (value instanceof MyPromise) {
-      return value.then(_this.resolved, _this.reject)
+      return value.then(_this.resolve, _this.reject)
     }
     setTimeout(() => {
       if (_this.currentState === PENDING) {
@@ -52,9 +52,9 @@ MyPromise.prototype.then = function (onResolved, onRejected) {
     // promise1(this/self)的状态已经确定并且为resolved, 调用onResolved
     return promise2 = new MyPromise(function (resolve, reject) {
       // 规范 2.2.4: 保证 onFulfilled onRjected 异步执行
-      setTimeout(() => {
+      setTimeout(function () {
         try {
-          var x = onResolved(self.value)
+          const x = onResolved(self.value)
           resolutionProcedure(promise2, x, resolve, reject)
         } catch (e) {
           reject(e)
@@ -65,9 +65,9 @@ MyPromise.prototype.then = function (onResolved, onRejected) {
 
   if (self.currentState === REJECTED) {
     return promise2 = new MyPromise(function (resolve, reject) {
-      setTimeout(() => {
+      setTimeout(function () {
         try {
-          var x = onRejected(self.value)
+          const x = onRejected(self.value)
           resolutionProcedure(promise2, x, resolve, reject)
         } catch (e) {
           reject(e)
@@ -79,10 +79,10 @@ MyPromise.prototype.then = function (onResolved, onRejected) {
   if (self.currentState === PENDING) {
     // 当前Promise还处于pending状态不能确定调用onResolved还是onRejected
     // 所以需要将 两种情况的判断处理逻辑 作为callback 放入当前Promise对象的回调数组里
-    return promise2 = new Promise(function (resolve, reject) {
+    return promise2 = new MyPromise(function (resolve, reject) {
       self.resolvedCallbacks.push(function (value) {
         try {
-          var x = onResolved(self.value)
+          const x = onResolved(self.value)
           resolutionProcedure(promise2, x, resolve, reject)
         } catch (e) {
           reject(e)
@@ -90,7 +90,7 @@ MyPromise.prototype.then = function (onResolved, onRejected) {
       })
       self.rejectedCallbacks.push(function (reason) {
         try {
-          var x = onRejected(self.value)
+          const x = onRejected(self.value)
           resolutionProcedure(promise2, x, resolve, reject)
         } catch (e) {
           reject(e)
