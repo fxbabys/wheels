@@ -31,6 +31,57 @@ const createStore = reducer => {
   return store
 }
 
+const { PropTypes } = React
+
+class Provider extends React.component {  // convert a store prop into a context property
+  getChildContext () {
+    return {
+      store: this.props.store
+    }
+  }
+  render () {
+    return this.props.children
+  }
+}
+Provider.childContextTypes = {
+  store: PropTypes.object
+}
+
+const connect = ( // convert context back into props
+  mapStateToProps = () => ({}), mapDisPatchToProps = () => ({})
+) => Component => {
+  class Connected extends React.Component {
+    onStoreOrPropsChange (props) {
+      const { store } = this.context
+      const state = store.getState()
+      const stateProps = mapStateToProps(state, props)
+      const dispatchProps = mapDisPatchToProps(store.dispatch, props)
+      this.setState({
+        ...stateProps,
+        ...dispatchProps
+      })
+    }
+    componentWillMount () {
+      const { store } = this.context
+      this.onStoreOrPropsChange(this.props)
+      this.unsubscribe = store.subscribe(() => this.onStoreOrPropsChange(this.props))
+    }
+    componentWillReceiveProps (nextProps) {
+      this.onStoreOrPropsChange(nextProps)
+    }
+    componentWillMount () {
+      this.unsubscribe()
+    }
+    render () {
+      return <Component {...this.props} {...this.state} />
+    }
+  }
+  Connected.contextTypes = {
+    store: PropTypes.object
+  }
+  return Connected
+}
+
 const CREATE_NOTE = 'CREATE_NOTE'
 const UPDATE_NOTE = 'UPDATE_NOTE'
 const OPEN_NOTE = 'OPEN_NOTE'
@@ -166,60 +217,34 @@ const NoteApp = ({
   </div>
 }
 
-class NoteAppContainer extends React.Component {
-  constructor (props) {
-    super()
-    this.state = props.store.getState()
-    this.onAddNote = this.onAddNote.bind(this)
-    this.onChangeNote = this.onChangeNote.bind(this)
-    this.onOpenNote = this.onOpenNote.bind(this)
-    this.onCloseNote = this.onCloseNote.bind(this)
-  }
-  componentWillMount () {
-    this.unsubscribe = this.props.store.subscribe(() => 
-      this.setState(this.props.store.getState())
-    )
-  }
-  componentWillUnmount () {
-    this.unsubscribe()
-  }
-  onAddNote () {
-    this.props.store.dispatch({
-      type: CREATE_NOTE
-    })
-  }
-  onChangeNote (id, content) {
-    this.props.store.dispatch({
-      type: UPDATE_NOTE,
-      id,
-      content
-    })
-  }
-  onOpenNote (id) {
-    this.props.store.dispatch({
-      type: OPEN_NOTE,
-      id
-    })
-  }
-  onCloseNote () {
-    this.props.store.dispatch({
-      type: CLOSE_NOTE
-    })
-  }
-  render () {
-    return (
-      <NoteApp 
-        {...this.state}
-        onAddNote={this.onAddNote}
-        onChangeNote={this.onChangeNote}
-        onOpenNote={this.onOpenNote}
-        onCloseNote={this.onCloseNote}
-      />
-    )
-  }
-}
+const mapStateToProps = state => ({  // takes the current state from our store and returns some props
+  notes: state.notes,
+  openNoteId: state.openNoteId
+})
+
+const mapDisPatchToProps = dispatch => ({ // takes the dispatch method of our store and returns some more props
+  onAddNote: () => dispatch({
+    type: CREATE_NOTE
+  }),
+  onChangeNote: (id, content) => dispatch({
+    type: UPDATE_NOTE,
+    id,
+    content
+  }),
+  onOpenNote: id => dispatch({
+    type: OPEN_NOTE,
+    id
+  }),
+  onCloseNote: () => dispatch({
+    type: CLOSE_NOTE
+  })
+})
+
+const NoteAppContainer = connect(mapStateToProps, mapDisPatchToProps)(NoteApp) // a new component get all those mapped props
 
 ReactDOM.render(
-  <NoteAppContainer store={store}/>,
+  <Provider store={store}>
+    <NoteAppContainer />
+  </Provider>,
   document.getElementById('root')
 )
