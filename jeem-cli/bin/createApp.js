@@ -76,6 +76,6 @@ function init (appPath, appName) {
 
   console.log(`${chalk.green('Success!')}`)
   console.log()
-  console.log(`Then ${chalk.green(`cd ${appName}`)} && ${chalk.green(`npm install`)} && ${chalk.green(`npm start`)} to code your world!`)
+  console.log(`Then ${chalk.green(`cd ${appName}`)} && ${chalk.green(`yarn`)} && ${chalk.green(`yarn dev`)} to code your world!`)
   console.log()
 }
