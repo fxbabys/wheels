@@ -19,7 +19,7 @@ function getValue (name, age) {
 }
 
 Function.prototype.myCall = function (context) {
-  var context = context || window
+  var context = context || windowjjjjjjj
   context.fn = this
 
   var args = [...arguments].slice(1)
@@ -71,3 +71,26 @@ var getValueBind = getValue.bind(a)
 getValueBind('jeremy', '20')
 var getValueMyBind = getValue.myBind(a)
 getValueMyBind('jeremy', '20')
+
+
+/**
+ * Implements
+ * Pass sucs test as: plus(1)(4)(2)(3).toString() === 10
+ */
+
+function plus () {
+  var _args = [].slice.call(arguments)  // 类数组 arguemnts 转成数组
+  var _adder = function () {
+    [].push.apply(_args, [].slice.call(arguments)) // 与下行等价
+    // _args.push([].slice.call(arguments)[0])
+    return _adder
+  }
+  _adder.toString = function () {
+    return _args.reduce(function (a, b) {
+      return a + b
+    })
+  }
+  return _adder
+}
+
+console.log(plus(1)(4)(2)(3).toString())
