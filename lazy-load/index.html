@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<style>
+  .img {
+    width: 200px;
+    height: 200px;
+    background-color: gray;
+  }
+  .pic {
+    width: 200px;
+    height: 200px;
+  }
+</style>
+<body>
+  <div class="container">
+    <div class="img"><img alt="加载中" class="pic" data-src="./images/1.jpg"></div>
+    <div class="img"><img alt="加载中" class="pic" data-src="./images/2.jpg"></div>
+    <div class="img"><img alt="加载中" class="pic" data-src="./images/3.jpg"></div>
+    <div class="img"><img alt="加载中" class="pic" data-src="./images/4.jpg"></div>
+    <div class="img"><img alt="加载中" class="pic" data-src="./images/5.jpg"></div>
+    <div class="img"><img alt="加载中" class="pic" data-src="./images/6.jpg"></div>
+    <div class="img"><img alt="加载中" class="pic" data-src="./images/7.jpg"></div>
+    <div class="img"><img alt="加载中" class="pic" data-src="./images/8.jpg"></div>
+    <div class="img"><img alt="加载中" class="pic" data-src="./images/9.jpg"></div>
+    <div class="img"><img alt="加载中" class="pic" data-src="./images/10.jpg"></div>
+  </div>
+</body>
+<script>
+  const imgs = document.getElementsByTagName('img')
+  const viewHeight = window.innerHeight || document.documentElement.clientHeight // 当前可视区域高度
+  let num = 0
+  let len = imgs.length
+  function lazyload () {
+    for (let i = num; i < len; i++) {
+      let distance = viewHeight - imgs[i].getBoundingClientRect().top // 距离可视区域顶部的高度
+      if (distance >= 0) {
+        imgs[i].src = imgs[i].getAttribute('data-src')
+        num = i + 1
+      }
+    }
+  }
+  lazyload()
+  window.addEventListener('scroll', lazyload, false)
+</script>
+</html>
