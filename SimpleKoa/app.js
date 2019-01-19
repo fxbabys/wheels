@@ -1,22 +1,21 @@
 const simpleKoa = require('./application')
 const app = new simpleKoa()
 
-app.context.echoData = function (errno = 0, data = null, errmsg = '') {
-  this.res.setHeader('Content-Type', 'application/json;charset=utf-8')
-  this.body = {
-    errno,
-    data,
-    errmsg
-  }
-}
+let responseData = {}
 
-app.use(async ctx => {
-  let data = {
-    name: 'jeremy',
-    age: 16,
-    sex: 'male'
-  }
-  ctx.echoData(0, data, 'success')
+app.use(async (ctx, next) => {
+  responseData.name = 'jeremy'
+  await next()
+  ctx.body = responseData
+})
+
+app.use(async (ctx, next) => {
+  responseData.age = 21
+  await next()
+})
+
+app.use(async (ctx, next) => {
+  responseData.sex = 'male'
 })
 
 app.listen(3000, () => {

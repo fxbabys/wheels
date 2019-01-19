@@ -5,7 +5,7 @@ const response = require('./response')
 
 class Application {
   constructor () {
-    this.callbackFunc = null
+    this.middlewares = []
     this.context = context
     this.request = request
     this.response = response
@@ -14,14 +14,36 @@ class Application {
     let server = http.createServer(this.callback())
     server.listen(...args)
   }
-  use (fn) {
-    this.callbackFunc = fn
+  use (middleware) {
+    this.middlewares.push(middleware)
+  }
+  /**
+   * 中间件合并
+   */
+  compose () {
+    return async ctx => {
+      function createNext(middleware, oldNext) {
+        return async () => {
+          await middleware(ctx, oldNext)
+        }
+      }
+      let next = async () => {
+        return Promise.resolve()
+      }
+      for (let len = this.middlewares.length, i = len - 1; i >= 0; i--) {
+        let currentMiddleware = this.middlewares[i]
+        next = createNext(currentMiddleware, next)
+      }
+
+      await next()
+    }
   }
   callback () {
     return (req, res) => {
       const ctx = this.createContext(req, res)
       const respond = () => this.responseBody(ctx)
-      this.callbackFunc(ctx).then(respond)
+      const fn = this.compose()
+      return fn(ctx).then(respond)
     }
   }
   /**
