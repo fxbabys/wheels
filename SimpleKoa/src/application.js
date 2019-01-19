@@ -3,8 +3,11 @@ const context = require('./context')
 const request = require('./request')
 const response = require('./response')
 
-class Application {
+const EventEmitter = require('events')
+
+class Application extends EventEmitter {
   constructor () {
+    super()
     this.middlewares = []
     this.context = context
     this.request = request
@@ -38,12 +41,17 @@ class Application {
       await next()
     }
   }
+  /**
+   * 获取 http server 所需的 callback 函数
+   * @return {Funtion} fn
+   */
   callback () {
     return (req, res) => {
       const ctx = this.createContext(req, res)
       const respond = () => this.responseBody(ctx)
+      const onerror = err => this.onerror(err, ctx)
       const fn = this.compose()
-      return fn(ctx).then(respond)
+      return fn(ctx).then(respond).catch(onerror)
     }
   }
   /**
@@ -57,7 +65,7 @@ class Application {
     ctx.request = Object.create(this.request)
     ctx.response = Object.create(this.response)
     ctx.req = ctx.request.req = req
-    ctx.res = ctx.request.res = res
+    ctx.res = ctx.response.res = res
     return ctx
   }
   /**
@@ -71,6 +79,21 @@ class Application {
     } else if (typeof content === 'object') {
       ctx.res.end(JSON.stringify(content))
     }
+  }
+  /**
+   * 错误处理
+   * @param {Object} err Error 对象
+   * @param {Object} ctx 实例
+   */
+  onerror (err, ctx) {
+    if (err.code === 'ENOENT') {
+      ctx.status = 404
+    } else {
+      ctx.status = 500
+    }
+    let msg = err.message || 'Internal error'
+    ctx.res.end(msg)
+    this.emit('error', err)
   }
 }
 

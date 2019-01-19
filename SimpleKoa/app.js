@@ -1,21 +1,12 @@
-const simpleKoa = require('./application')
+const simpleKoa = require('./src/application')
 const app = new simpleKoa()
 
-let responseData = {}
-
-app.use(async (ctx, next) => {
-  responseData.name = 'jeremy'
-  await next()
-  ctx.body = responseData
+app.use(async ctx => {
+  throw new Error('ooops')
 })
 
-app.use(async (ctx, next) => {
-  responseData.age = 21
-  await next()
-})
-
-app.use(async (ctx, next) => {
-  responseData.sex = 'male'
+app.on('error', err => {
+  console.log(err.stack)
 })
 
 app.listen(3000, () => {
