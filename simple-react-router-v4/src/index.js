@@ -60,7 +60,7 @@ const App = () => (
     </ul>
 
     <hr/>
-    <Route exacr path="/" component={Home} />
+    <Route exact path="/" component={Home} />
     <Route path="/about" component={About} />
     <Route path="/topics" component={Topics} />
   </div>

@@ -53,7 +53,7 @@ export class Route extends Component {
   }
 
   componentWillMount () {
-    window.addEventListener('popstate', this.handlePop)
+    window.addEventListener('popstate', this.handlePop)  // 监听浏览器前进/后退按钮的点击
     register(this)
   }
 
@@ -63,6 +63,9 @@ export class Route extends Component {
   }
 
   handlePop = () => {
+    /**
+     * 两种情况会调用: 1. 点击一个 a 标签  2. 点击浏览器前进/后退按钮
+     */
     this.forceUpdate() // 强制更新 UI
   }
 
