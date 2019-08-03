@@ -8,6 +8,14 @@ class EventEmitter {
     callbacks.push(callback)
     this._events[eventName] = callbacks
   }
+  once(eventName, callback) {
+    let cb = (...args) => {
+      callback.apply(args)
+      let callbacks = this._events[eventName] || []
+      this._events[eventName] = callbacks && callbacks.filter(fn => fn !== callback)
+    }
+    this.on(eventName, cb)
+  }
   off(eventName) {
     delete this._events[eventName]
   }
