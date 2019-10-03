@@ -61,6 +61,14 @@ MyPromise.prototype.catch = function (callback) {
   return this.then(null, callback)
 }
 
+MyPromise.prototype.finally = function (callback) {
+  const p = this.constructor
+  return this.then(
+    value => p.resolve(callback()).then(() => value()),
+    err => p.resolve(callback()).then(() => { throw err })
+  )
+}
+
 // 接受一个 promises 数组, 全部完成再 resolve
 MyPromise.all = function (promises) {
   return new MyPromise(function (resolve, reject) {
