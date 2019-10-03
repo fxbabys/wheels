@@ -1,12 +1,14 @@
-function deepClone (obj) {
+function deepClone (obj, hash = new WeakMap()) {
   const isObj = o => (typeof o === 'object' || typeof o === 'function') && o !== null
 
-  if (!isObj(obj)) throw new Error('the passing paramter is not an object')
+  if (!isObj(obj)) return obj
+  if (hash.has(obj)) return hash.get(obj)
 
   const isArray = Array.isArray(obj)
   const newObj = isArray ? [...obj] : { ...obj }
+  hash.set(obj, newObj)
   Reflect.ownKeys(newObj).forEach(key => {
-    newObj[key] = isObj(obj[key]) ? deepClone(obj[key]) : obj[key]
+    newObj[key] = isObj(obj[key]) ? deepClone(obj[key], hash) : obj[key]
   })
 
   return newObj
